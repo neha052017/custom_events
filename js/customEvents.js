@@ -36,6 +36,7 @@
 		DBLCLICK = 'dblclick',
 		TOUCHSTART = 'touchstart',
 		CLICK = 'click',
+		CONTEXTMENU = 'contextmenu',
 		each = HC.each,
 		pick = HC.pick,
 		wrap = HC.wrap,
@@ -288,8 +289,8 @@
 			}
 
 			for (var action in events) {
-
-				(function (event) {
+				if(events["click"]!=undefined){
+					(function (event) {
 					if (events.hasOwnProperty(event) && !SVGelem[event]) {
 						if (isTouchDevice && event === DBLCLICK) { //  #30 - fallback for iPad
 							
@@ -338,7 +339,12 @@
 									tapped = null;
 									
 									if (elemObj && elemObj.drilldown === undefined) {
-										events[event].call(elemObj, e);
+										if(event == "click"){
+											events[CLICK].call(elemObj, e);
+										}
+										else{
+											events[event].call(elemObj, e);
+										}
 									}
 								}
 
@@ -361,7 +367,7 @@
 										elemObj = eventObject.searchPoint(normalizedEvent, eventObject.kdDimensions === 1);
 									}
 
-									e.point = elemObj;	//	#89 point reference in mouse event
+									e.point = eventObject.kdTree.point;	//	#89 point reference in mouse event
 								}
 
 								if ((eventObject && !isPoint) || (eventObject && isNumber(eventObject.value))) { // #95 wrong reference for axis labels
@@ -376,7 +382,12 @@
 								if (elemObj && elemObj.drilldown) { // #114 - drillUp - undefined ddDupes []
 									elemObj.doDrilldown(undefined, undefined, e);
 								} else {
-									events[event].call(elemObj, e);
+									if(event == "click"){
+										events[CLICK].call(elemObj, e);
+									}
+									else{
+										events[event].call(elemObj, e);
+									}
 								}
 
 								return false;
@@ -388,6 +399,8 @@
 						};
 					}
 				})(action);
+				}
+				
 			}
 		},
 		eventElement: {
