@@ -366,7 +366,7 @@
 									if (!eventObject.directTouch) {
 										elemObj = eventObject.searchPoint(normalizedEvent, eventObject.kdDimensions === 1);
 									}
-
+									e.eventChartOptions = elemObj;
 									e.point = eventObject.kdTree.point;	//	#89 point reference in mouse event
 								}
 
