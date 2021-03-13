@@ -1,7 +1,7 @@
 /**
-* Custom events v3.0.2 (2019-07-10)
+* Custom events v3.0.10 (2020-12-21)
 *
-* (c) 2012-2019 Black Label
+* (c) 2012-2020 Black Label
 *
 * License: Creative Commons Attribution (CC)
 */
@@ -36,8 +36,6 @@
 		DBLCLICK = 'dblclick',
 		TOUCHSTART = 'touchstart',
 		CLICK = 'click',
-		CONTEXTMENU = 'contextmenu',
-		each = HC.each,
 		pick = HC.pick,
 		wrap = HC.wrap,
 		merge = HC.merge,
@@ -120,6 +118,10 @@
 				};
 			}
 
+			if (typeof userOptionsPointEvents.click === "undefined" && typeof userOptionsEvents.click !== "undefined"){
+				userOptionsPointEvents.click = userOptionsEvents.click;
+			}
+
 			// Add support for legendItemClick in pie chart
 			if (userOptionsPointEvents) {
 				options.point.events = {
@@ -160,7 +162,7 @@
 				[HC.PlotLineOrBand, ['render']],
 				[HC.Series, ['drawPoints', 'drawDataLabels']]
 			];
-	  
+
 			// support for extra series
 			objectEach(seriesTypes, function (fn, seriesType) {
 				protoMethods.push([
@@ -176,14 +178,14 @@
 		 **/
 		init: function () {
 			var eventsProtoMethods = this.getEventsProtoMethods(); // array of pairs [object, [methods]]
-
-			each(eventsProtoMethods, function (protoMethod) {
+			
+			eventsProtoMethods.forEach(function (protoMethod) {
 				if (isArray(protoMethod)) {
 					proto = protoMethod[0] && protoMethod[0].prototype;
 					methods = protoMethod[1];
 
 					if (proto) {
-						each(methods, function (method) {
+						methods.forEach(function (method) {
 							customEvents.attach(proto, method);
 						});
 					}
@@ -289,8 +291,8 @@
 			}
 
 			for (var action in events) {
-				if(events["click"]!=undefined){
-					(function (event) {
+
+				(function (event) {
 					if (events.hasOwnProperty(event) && !SVGelem[event]) {
 						if (isTouchDevice && event === DBLCLICK) { //  #30 - fallback for iPad
 							
@@ -339,12 +341,7 @@
 									tapped = null;
 									
 									if (elemObj && elemObj.drilldown === undefined) {
-										if(event == "click"){
-											events[CLICK].call(elemObj, e);
-										}
-										else{
-											events[event].call(elemObj, e);
-										}
+										events[event].call(elemObj, e);
 									}
 								}
 
@@ -357,7 +354,6 @@
 							addEvent(SVGelem.element, event, function (e) {
 								
 								e.stopPropagation();
-								e.preventDefault();
 
 								if (isSeries) { // #108, #93 - references in e.point and this after chart.update()
 									var chart = eventObject.chart,
@@ -366,8 +362,8 @@
 									if (!eventObject.directTouch) {
 										elemObj = eventObject.searchPoint(normalizedEvent, eventObject.kdDimensions === 1);
 									}
-									e.eventChartOptions = elemObj;
-									e.point = eventObject.kdTree.point;	//	#89 point reference in mouse event
+
+									e.point = elemObj;	//	#89 point reference in mouse event
 								}
 
 								if ((eventObject && !isPoint) || (eventObject && isNumber(eventObject.value))) { // #95 wrong reference for axis labels
@@ -379,15 +375,28 @@
 									elemObj.value = elemObj.textStr;
 								}
 
+								if (
+									isPoint &&
+									event === 'click' &&
+									elemObj.series &&
+									elemObj.series.options &&
+									elemObj.series.options.allowPointSelect
+								) {
+									var defaultFunction = function (event) {
+										// Control key is for Windows, meta (= Cmd key) for Mac, Shift
+										// for Opera.
+										if (elemObj.select) { // #2911
+												elemObj.select(null, e.ctrlKey || e.metaKey || e.shiftKey);
+										}
+									};
+
+								  	HC.fireEvent(elemObj, event, e, defaultFunction);
+								}
+
 								if (elemObj && elemObj.drilldown) { // #114 - drillUp - undefined ddDupes []
 									elemObj.doDrilldown(undefined, undefined, e);
-								} else {
-									if(event == "click"){
-										events[CLICK].call(elemObj, e);
-									}
-									else{
-										events[event].call(elemObj, e);
-									}
+								} else if (events && events[event]) {
+									events[event].call(elemObj, e);
 								}
 
 								return false;
@@ -399,8 +408,6 @@
 						};
 					}
 				})(action);
-				}
-				
 			}
 		},
 		eventElement: {
@@ -521,9 +528,9 @@
 
 				if (stackLabels && stackLabels.enabled) {
 					eventsPoint = stackLabels.events;
-					elementPoint = this.stacks;
+					elementPoint = this.stacks || this.stacking.stacks;
 					eventsStackLabel = stackLabels.events;
-					elementStackLabel = this.stackTotalGroup;
+					elementStackLabel = this.stackTotalGroup || this.stacking.stackTotalGroup;
 				}
 
 				return {
