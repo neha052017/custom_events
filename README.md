@@ -1,104 +1,91 @@
-## :warning: Please read these instructions carefully and entirely first
-* Clone this repository to your local machine.
-* Use your IDE of choice to complete the assignment.
-* When you have completed the assignment, you need to  push your code to this repository and [mark the assignment as completed by clicking here](https://app.snapcode.review/submission_links/6581ec9d-18cf-439b-82e6-1e0a276a5da1).
-* Once you mark it as completed, your access to this repository will be revoked. Please make sure that you have completed the assignment and pushed all code from your local machine to this repository before you click the link.
-* There is no time limit for this task - however, for guidance, it is expected to typically take around 1-2 hours.
-    
-# Begin the task
 
-Write some code that provides the following basic shopping cart capabilities:
+# Custom events - Highcharts module
 
-1. Add a product to the cart
-   1. Specifying the product name and quantity
-   2. Retrieve the product price by issuing a request to the [Price API](#price-api) specified below
-   3. Cart state (totals, etc.) must be available
+Go to project page to see this module in action: [http://blacklabel.github.io/custom_events/](http://blacklabel.github.io/custom_events/)
 
-2. Calculate the state:
-   1. Cart subtotal (sum of price for all items)
-   2. Tax payable (charged at 12.5% on the subtotal)
-   3. Total payable (subtotal + tax)
-   4. Totals should be rounded up where required (to two decimal places)
 
-## Price API
+### Requirements
 
-The price API is an existing API that returns the price details for a product, identified by it's name. The shopping cart should integrate with the price API to retrieve product prices.
+* Plugin requires the latest Highcharts (tested with 6.1.4)
 
-### Price API Service Details
+### Installation
 
-Base URL: `https://equalexperts.github.io/`
+* Like any other Highcharts module (e.g. exporting), add `<script>` tag pointing to `custom_events.js` below Highcharts script tag.
 
-View Product: `GET /backend-take-home-test-data/{product}.json`
+* For NPM users:
+```
+var Highcharts = require('highcharts'),
+    HighchartsCustomEvents = require('highcharts-custom-events')(Highcharts);
+```
 
-List of available products
-* `cheerios`
-* `cornflakes`
-* `frosties`
-* `shreddies`
-* `weetabix`
+* For BOWER users:
 
-## Example
-The below is a sample with the correct values you can use to confirm your calculations
+```
+bower install highcharts-custom-events
+```
 
-### Inputs
-* Add 1 × cornflakes @ 2.52 each
-* Add another 1 x cornflakes @2.52 each
-* Add 1 × weetabix @ 9.98 each
-  
-### Results  
-* Cart contains 2 x cornflakes
-* Cart contains 1 x weetabix
-* Subtotal = 15.02
-* Tax = 1.88
-* Total = 16.90
+### Code
 
-## Tips on what we’re looking for
+The latest code is available on github: [https://github.com/blacklabel/custom_events/](https://github.com/blacklabel/custom_events/)
 
-We value simplicity as an architectural virtue and as a development practice. Solutions should reflect the difficulty of the assigned task, and shouldn’t be overly complex. We prefer simple, well tested solutions over clever solutions. 
+### Usage and demos
 
-### DO
+It's quite simple and intuitive, just pass function as other events:
 
-* ✅ Include unit tests.
-* ✅ Test both any client and logic.
-* ✅ Update the README.md with any relevant information, assumptions, and/or tradeoffs you would like to highlight.
+```
+events: {
+                        dblclick: function () {
+                            $('#report').html('dbclick on xAxis label');
+                        },
+                        click: function () {
+                            $('#report').html('click on xAxis label');
+                        },
+                        contextmenu: function () {
+                            $('#report').html('context menu on xAxis label');
+                        }
+}
+```
 
-### DO NOT
+Crosshairs
 
-* ❌ Submit any form of app, such as web APIs, browser, desktop, or command-line applications.
-* ❌ Add unnecessary layers of abstraction.
-* ❌ Add unnecessary patterns/ architectural features that aren’t called for e.g. persistent storage.
+```
+crosshair: {
+    enabled: true,
+    events: {
+                        dblclick: function () {
+                            $('#report').html('dbclick on xAxis label');
+                        },
+                        click: function () {
+                            $('#report').html('click on xAxis label');
+                        },
+                        contextmenu: function () {
+                            $('#report').html('context menu on xAxis label');
+                        }
+    }
+}
+```
 
-### Running the API code
+### Available events
 
-* Install dependencies: npm install
-* To run test cases: npm test
+* click
+* double click (including mobile devices)
+* right click (context menu)
+* mouse over
+* mouse out
+* mouse down
+* mouse move
 
-### Environment Variables
+### Elements
 
-* Create a .env file in the root directory of the project and add the following environment variables:
-   1) PRICE_API_BASE_URL=https://equalexperts.github.io/backend-take-home-test-data/
-   2) TAX_RATE=12.5
-
-### Assumptions
-
-1) Price API Response Assumptions:
-   * The Price API always returns a valid response with a price field.
-   * The API response time is reasonable and does not significantly delay the application.
-   * The Price API is always available and does not return errors.
-
-2) Product Assumptions:
-   * Product names are unique identifiers.
-   * Product quantities are always whole numbers and positive.
-   * The product prices are positive numbers and can include decimal values.
-
-3) Cart Behavior Assumptions:
-   * Adding the same product again will add to its quantity in the cart.
-   * There is no removal or update functionality for products in the cart in this implementation.
-
-4) Tax Calculation Assumptions:
-   * The tax rate is fixed at 12.5% and does not change.
-   * Tax is calculated on the subtotal of the cart.
-
-5) Environment and Setup Assumptions:
-   * Node.js and npm are installed on the user's machine.
-   * Users know how to create and configure a .env file with the required environment variables.
+* title
+* subtitle
+* axis labels
+* axis title
+* plotLines
+* plotBands, including labels
+* point
+* series
+* legend
+* datalabels
+* flags
+* crosshairs
